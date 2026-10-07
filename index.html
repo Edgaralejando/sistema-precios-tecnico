@@ -12,6 +12,7 @@
             --primary: #38bdf8;
             --primary-glow: rgba(56, 189, 248, 0.15);
             --accent: #10b981;
+            --warning: #f59e0b;
             --text-main: #f3f4f6;
             --text-muted: #9ca3af;
         }
@@ -81,6 +82,11 @@
             border-color: var(--primary);
         }
 
+        .panel-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
         .btn-add {
             background-color: var(--accent);
             color: #090d16;
@@ -93,6 +99,17 @@
         }
 
         .btn-add:hover { opacity: 0.9; }
+
+        .btn-cancel {
+            background-color: #ef4444;
+            color: white;
+            font-weight: 700;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+        }
 
         .tabs {
             display: flex;
@@ -171,6 +188,18 @@
             font-weight: 700;
             color: var(--accent);
         }
+
+        .btn-edit {
+            background-color: var(--warning);
+            color: #090d16;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .btn-edit:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -179,9 +208,10 @@
             <h1>PC MASTER PRECIOS</h1>
         </header>
 
-        <!-- Panel para agregar ítems a la base de datos en la nube -->
+        <!-- Panel para agregar o modificar ítems -->
         <div class="admin-panel">
-            <h3>➕ Agregar Nuevo Ítem a la Nube</h3>
+            <h3 id="panel-titulo">➕ Agregar Nuevo Ítem a la Nube</h3>
+            <input type="hidden" id="edit-id">
             <div class="form-grid">
                 <select id="nuevo-categoria">
                     <option value="celulares">Celulares</option>
@@ -192,7 +222,10 @@
                 <input type="text" id="nuevo-detalle" placeholder="Detalle (Ej: Pantalla OLED S/M)">
                 <input type="text" id="nuevo-precio" placeholder="Precio (Ej: $25.000 o Consultar)">
             </div>
-            <button class="btn-add" onclick="agregarItemBD()">Guardar en la Base de Datos</button>
+            <div class="panel-actions">
+                <button class="btn-add" id="btn-accion" onclick="guardarItemBD()">Guardar en la Base de Datos</button>
+                <button class="btn-cancel" id="btn-cancelar" onclick="limpiarFormulario()">Cancelar Edición</button>
+            </div>
         </div>
 
         <div class="tabs">
@@ -203,48 +236,53 @@
 
         <div id="celulares" class="catalog-section active">
             <div class="search-box"><input type="text" id="search-celulares" placeholder="Buscar componente o modelo en celulares..." onkeyup="filterTable('celulares')"></div>
-            <div class="table-container"><table id="table-celulares"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th></tr></thead><tbody></tbody></table></div>
+            <div class="table-container"><table id="table-celulares"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
         </div>
 
         <div id="consolas" class="catalog-section">
             <div class="search-box"><input type="text" id="search-consolas" placeholder="Buscar componente o modelo en consolas..." onkeyup="filterTable('consolas')"></div>
-            <div class="table-container"><table id="table-consolas"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th></tr></thead><tbody></tbody></table></div>
+            <div class="table-container"><table id="table-consolas"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
         </div>
 
         <div id="computadoras" class="catalog-section">
             <div class="search-box"><input type="text" id="search-computadoras" placeholder="Buscar componente o modelo en computadoras..." onkeyup="filterTable('computadoras')"></div>
-            <div class="table-container"><table id="table-computadoras"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th></tr></thead><tbody></tbody></table></div>
+            <div class="table-container"><table id="table-computadoras"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
         </div>
     </div>
 
     <!-- SDK de Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // ⚠️ REEMPLAZA ESTO CON TUS CREDENCIALES REALES DE FIREBASE
         const firebaseConfig = {
-  apiKey: "AIzaSyCabrm6iqHIgjNb-UUb8xxJm9-Hri-q0Gk",
-  authDomain: "pcmaster-inventario.firebaseapp.com",
-  projectId: "pcmaster-inventario",
-  storageBucket: "pcmaster-inventario.firebasestorage.app",
-  messagingSenderId: "669715767932",
-  appId: "1:669715767932:web:d0159c395da5b9cbcc5ff9",
-  measurementId: "G-E66162R6CV"
-};
+            apiKey: "AIzaSyCabrm6iqHIgjNb-UUb8xxJm9-Hri-q0Gk",
+            authDomain: "pcmaster-inventario.firebaseapp.com",
+            projectId: "pcmaster-inventario",
+            storageBucket: "pcmaster-inventario.firebasestorage.app",
+            messagingSenderId: "669715767932",
+            appId: "1:669715767932:web:d0159c395da5b9cbcc5ff9",
+            measurementId: "G-E66162R6CV"
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Almacenamiento local temporal para ubicar datos al editar
+        window.datosMemoria = {};
+
         window.cargarDatosBD = async function() {
             try {
                 const querySnapshot = await getDocs(collection(db, "precios"));
+                window.datosMemoria = {};
                 let datosGlobales = { celulares: [], consolas: [], computadoras: [] };
 
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
+                querySnapshot.forEach((documento) => {
+                    const data = documento.data();
+                    const id = documento.id;
+                    window.datosMemoria[id] = data;
                     if (datosGlobales[data.categoria]) {
-                        datosGlobales[data.categoria].push(data);
+                        datosGlobales[data.categoria].push({ id, ...data });
                     }
                 });
 
@@ -252,7 +290,13 @@
                     const tbody = document.querySelector(`#table-${cat} tbody`);
                     tbody.innerHTML = "";
                     datosGlobales[cat].forEach(row => {
-                        tbody.innerHTML += `<tr><td>${row.item}</td><td>${row.detalle}</td><td class="price-tag">${row.precio}</td></tr>`;
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${row.item}</td>
+                                <td>${row.detalle}</td>
+                                <td class="price-tag">${row.precio}</td>
+                                <td><button class="btn-edit" onclick="prepararEdicion('${row.id}')">✏️ Editar</button></td>
+                            </tr>`;
                     });
                 });
             } catch (error) {
@@ -260,7 +304,8 @@
             }
         };
 
-        window.agregarItemBD = async function() {
+        window.guardarItemBD = async function() {
+            const editId = document.getElementById('edit-id').value;
             const categoria = document.getElementById('nuevo-categoria').value;
             const item = document.getElementById('nuevo-item').value.trim();
             const detalle = document.getElementById('nuevo-detalle').value.trim();
@@ -272,23 +317,55 @@
             }
 
             try {
-                await addDoc(collection(db, "precios"), {
-                    categoria,
-                    item,
-                    detalle,
-                    precio,
-                    fecha: new Date()
-                });
+                if (editId) {
+                    // Actualizar ítem existente
+                    const docRef = doc(db, "precios", editId);
+                    await updateDoc(docRef, { categoria, item, detalle, precio });
+                    alert("¡Ítem actualizado correctamente en la nube!");
+                } else {
+                    // Crear nuevo ítem
+                    await addDoc(collection(db, "precios"), {
+                        categoria,
+                        item,
+                        detalle,
+                        precio,
+                        fecha: new Date()
+                    });
+                    alert("¡Ítem guardado permanentemente en la nube!");
+                }
 
-                alert("¡Ítem guardado permanentemente en la nube!");
-                document.getElementById('nuevo-item').value = "";
-                document.getElementById('nuevo-detalle').value = "";
-                document.getElementById('nuevo-precio').value = "";
+                window.limpiarFormulario();
                 window.cargarDatosBD();
             } catch (error) {
-                alert("Error al guardar en la base de datos: " + error.message);
+                alert("Error en la base de datos: " + error.message);
                 console.error(error);
             }
+        };
+
+        window.prepararEdicion = function(id) {
+            const data = window.datosMemoria[id];
+            if (!data) return;
+
+            document.getElementById('edit-id').value = id;
+            document.getElementById('nuevo-categoria').value = data.categoria;
+            document.getElementById('nuevo-item').value = data.item;
+            document.getElementById('nuevo-detalle').value = data.detalle;
+            document.getElementById('nuevo-precio').value = data.precio;
+
+            document.getElementById('panel-titulo').innerText = "✏️ Modificar Ítem Existente";
+            document.getElementById('btn-accion').innerText = "Actualizar en la Nube";
+            document.getElementById('btn-cancelar').style.display = "inline-block";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.limpiarFormulario = function() {
+            document.getElementById('edit-id').value = "";
+            document.getElementById('nuevo-item').value = "";
+            document.getElementById('nuevo-detalle').value = "";
+            document.getElementById('nuevo-precio').value = "";
+            document.getElementById('panel-titulo').innerText = "➕ Agregar Nuevo Ítem a la Nube";
+            document.getElementById('btn-accion').innerText = "Guardar en la Base de Datos";
+            document.getElementById('btn-cancelar').style.display = "none";
         };
 
         window.cargarDatosBD();

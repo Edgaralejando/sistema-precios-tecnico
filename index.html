@@ -112,6 +112,17 @@
         }
         .btn-bulk:hover { opacity: 0.9; }
 
+        .btn-clean {
+            background-color: #d97706;
+            color: white;
+            font-weight: 700;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .btn-clean:hover { opacity: 0.9; }
+
         .btn-cancel {
             background-color: #ef4444;
             color: white;
@@ -268,7 +279,8 @@
             </div>
             <div class="panel-actions">
                 <button class="btn-add" id="btn-accion" onclick="guardarItemBD()">Guardar en la Base de Datos</button>
-                <button class="btn-bulk" onclick="cargarProductosMasivos()">🚀 Cargar pendientes a Firebase</button>
+                <button class="btn-bulk" onclick="cargarProductosMasivos()">🚀 Cargar faltantes</button>
+                <button class="btn-clean" onclick="limpiarDuplicadosBD()">🧹 Borrar Duplicados de Firebase</button>
                 <button class="btn-cancel" id="btn-cancelar" onclick="limpiarFormulario()">Cancelar Edición</button>
             </div>
         </div>
@@ -289,24 +301,24 @@
                 <button class="sub-tab-btn" onclick="filterSubcat('Camaras', this)">Cámaras</button>
                 <button class="sub-tab-btn" onclick="filterSubcat('Tapas traseras', this)">Tapas traseras</button>
             </div>
-            <div class="search-box"><input type="text" id="search-celulares" placeholder="Buscar componente o modelo en celulares..." onkeyup="filterTable('celulares')"></div>
+            <div class="search-box"><input type="text" id="search-celulares" placeholder="Buscar componente o modelo en celulares..." oninput="debounceFilter('celulares')"></div>
             <div class="table-container"><table id="table-celulares"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
         </div>
 
         <div id="consolas" class="catalog-section">
-            <div class="search-box"><input type="text" id="search-consolas" placeholder="Buscar componente o modelo en consolas..." onkeyup="filterTable('consolas')"></div>
+            <div class="search-box"><input type="text" id="search-consolas" placeholder="Buscar componente o modelo en consolas..." oninput="debounceFilter('consolas')"></div>
             <div class="table-container"><table id="table-consolas"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
         </div>
 
         <div id="computadoras" class="catalog-section">
-            <div class="search-box"><input type="text" id="search-computadoras" placeholder="Buscar componente o modelo en computadoras..." onkeyup="filterTable('computadoras')"></div>
+            <div class="search-box"><input type="text" id="search-computadoras" placeholder="Buscar componente o modelo en computadoras..." oninput="debounceFilter('computadoras')"></div>
             <div class="table-container"><table id="table-computadoras"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCabrm6iqHIgjNb-UUb8xxJm9-Hri-q0Gk",
@@ -365,6 +377,35 @@
             }
         };
 
+        // Función para limpiar elementos duplicados de la base de datos automáticamente
+        window.limpiarDuplicadosBD = async function() {
+            if (!confirm("🧹 ¿Deseas escanear y eliminar los productos repetidos en Firebase?")) return;
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "precios"));
+                const vistos = new Set();
+                let eliminados = 0;
+
+                for (const documento of querySnapshot.docs) {
+                    const d = documento.data();
+                    const clave = `${d.categoria}_${d.subcategoria || ''}_${d.item}_${d.detalle}`.toLowerCase();
+
+                    if (vistos.has(clave)) {
+                        await deleteDoc(doc(db, "precios", documento.id));
+                        eliminados++;
+                    } else {
+                        vistos.add(clave);
+                    }
+                }
+
+                alert(`¡Limpieza completada! Se eliminaron ${eliminados} registros duplicados.`);
+                window.cargarDatosBD();
+            } catch (error) {
+                alert("Error al limpiar duplicados: " + error.message);
+                console.error(error);
+            }
+        };
+
         window.guardarItemBD = async function() {
             const editId = document.getElementById('edit-id').value;
             const categoria = document.getElementById('nuevo-categoria').value;
@@ -403,9 +444,8 @@
             }
         };
 
-        // Carga masiva inteligente: solo añade lo que no exista previamente en la base de datos
         window.cargarProductosMasivos = async function() {
-            if (!confirm("¿Deseas cargar los productos faltantes a la base de datos? (No se duplicarán los existentes)")) return;
+            if (!confirm("¿Deseas cargar los productos faltantes a la base de datos?")) return;
 
             const listaProductos = [
                 { categoria: "celulares", subcategoria: "Pantallas", item: "APPLE", detalle: "IPHONE 6", precio: "$28.000" },
@@ -533,12 +573,11 @@
             ];
 
             try {
-                // Obtenemos los registros existentes para comparar y evitar duplicados
                 const querySnapshot = await getDocs(collection(db, "precios"));
                 const existentes = new Set();
                 querySnapshot.forEach(doc => {
                     const d = doc.data();
-                    existentes.add(`${d.categoria}_${d.subcat || d.subcategoria || ''}_${d.item}_${d.detalle}`.toLowerCase());
+                    existentes.add(`${d.categoria}_${d.subcategoria || ''}_${d.item}_${d.detalle}`.toLowerCase());
                 });
 
                 let agregados = 0;
@@ -557,7 +596,7 @@
                     }
                 }
 
-                alert(`¡Proceso completado! Se agregaron ${agregados} productos nuevos (sin duplicar los existentes).`);
+                alert(`¡Proceso completado! Se agregaron ${agregados} productos nuevos.`);
                 window.cargarDatosBD();
             } catch (err) {
                 alert("Error en la carga masiva: " + err.message);
@@ -623,14 +662,26 @@
             });
         }
 
+        // Búsqueda optimizada con retardo (debounce) para evitar que se cuelgue en móviles
+        let searchTimeout;
+        function debounceFilter(category) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                filterTable(category);
+            }, 150);
+        }
+
         function filterTable(category) {
             const filter = document.getElementById(`search-${category}`).value.toLowerCase();
             const tr = document.querySelectorAll(`#table-${category} tbody tr`);
-            tr.forEach(row => {
-                const text = row.innerText.toLowerCase();
-                const matchesSearch = text.includes(filter);
-                const matchesSubcat = (category !== 'celulares' || window.subcatActual === 'todos' || row.getAttribute('data-subcat') === window.subcatActual);
-                row.style.display = (matchesSearch && matchesSubcat) ? "" : "none";
+            
+            requestAnimationFrame(() => {
+                tr.forEach(row => {
+                    const text = row.innerText.toLowerCase();
+                    const matchesSearch = text.includes(filter);
+                    const matchesSubcat = (category !== 'celulares' || window.subcatActual === 'todos' || row.getAttribute('data-subcat') === window.subcatActual);
+                    row.style.display = (matchesSearch && matchesSubcat) ? "" : "none";
+                });
             });
         }
     </script>

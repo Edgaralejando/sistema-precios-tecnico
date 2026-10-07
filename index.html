@@ -280,7 +280,7 @@
             <div class="panel-actions">
                 <button class="btn-add" id="btn-accion" onclick="guardarItemBD()">Guardar en la Base de Datos</button>
                 <button class="btn-bulk" onclick="cargarProductosMasivos()">🚀 Cargar faltantes</button>
-                <button class="btn-clean" onclick="limpiarDuplicadosBD()">🧹 Borrar Duplicados de Firebase</button>
+                <button class="btn-clean" onclick="limpiarDuplicadosBD()">🧹 Limpieza Súper Inteligente</button>
                 <button class="btn-cancel" id="btn-cancelar" onclick="limpiarFormulario()">Cancelar Edición</button>
             </div>
         </div>
@@ -320,15 +320,15 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-  apiKey: "AIzaSyCabrm6iqHIgjNb-UUb8xxJm9-Hri-q0Gk",
-  authDomain: "pcmaster-inventario.firebaseapp.com",
-  projectId: "pcmaster-inventario",
-  storageBucket: "pcmaster-inventario.firebasestorage.app",
-  messagingSenderId: "669715767932",
-  appId: "1:669715767932:web:d0159c395da5b9cbcc5ff9",
-  measurementId: "G-E66162R6CV"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyCabrm6iqHIgjNb-UUb8xxJm9-Hri-q0Gk",
+            authDomain: "pcmaster-inventario.firebaseapp.com",
+            projectId: "pcmaster-inventario",
+            storageBucket: "pcmaster-inventario.firebasestorage.app",
+            messagingSenderId: "669715767932",
+            appId: "1:669715767932:web:d0159c395da5b9cbcc5ff9",
+            measurementId: "G-E66162R6CV"
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -377,9 +377,9 @@
             }
         };
 
-        // Función para limpiar elementos duplicados de la base de datos automáticamente
+        // Limpieza Súper Inteligente: Omite palabras como "pantalla", "oled", "incell" para detectar duplicados reales
         window.limpiarDuplicadosBD = async function() {
-            if (!confirm("🧹 ¿Deseas escanear y eliminar los productos repetidos en Firebase?")) return;
+            if (!confirm("🧹 ¿Deseas ejecutar la Limpieza Súper Inteligente para unificar y borrar variaciones y duplicados?")) return;
 
             try {
                 const querySnapshot = await getDocs(collection(db, "precios"));
@@ -388,17 +388,37 @@
 
                 for (const documento of querySnapshot.docs) {
                     const d = documento.data();
-                    const clave = `${d.categoria}_${d.subcategoria || ''}_${d.item}_${d.detalle}`.toLowerCase();
+                    
+                    // Limpieza profunda de texto: quitamos tildes, espacios extra y palabras de relleno comunes
+                    let detalleLimpio = (d.detalle || '')
+                        .toLowerCase()
+                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita tildes
+                        .replace(/\bpantalla\b/g, '')
+                        .replace(/\bdisplay\b/g, '')
+                        .replace(/\blcd\b/g, '')
+                        .replace(/\boled\b/g, '')
+                        .replace(/\bincell\b/g, '')
+                        .replace(/\borig(inal)?\b/g, '')
+                        .replace(/\bs\/m\b/g, '')
+                        .replace(/\bc\/marco\b/g, '')
+                        .replace(/[^a-z0-9]/g, ''); // solo deja letras y números clave (ej: "iphone12")
 
-                    if (vistos.has(clave)) {
+                    let itemLimpio = (d.item || '').toLowerCase().trim();
+                    let categoriaLimpia = (d.categoria || '').toLowerCase().trim();
+                    let subcatLimpia = (d.subcategoria || '').toLowerCase().trim();
+
+                    // Clave unificada súper inteligente
+                    const claveInteligente = `${categoriaLimpia}_${subcatLimpia}_${itemLimpio}_${detalleLimpio}`;
+
+                    if (vistos.has(claveInteligente)) {
                         await deleteDoc(doc(db, "precios", documento.id));
                         eliminados++;
                     } else {
-                        vistos.add(clave);
+                        vistos.add(claveInteligente);
                     }
                 }
 
-                alert(`¡Limpieza completada! Se eliminaron ${eliminados} registros duplicados.`);
+                alert(`¡Limpieza completada con éxito! Se eliminaron ${eliminados} registros duplicados/variaciones.`);
                 window.cargarDatosBD();
             } catch (error) {
                 alert("Error al limpiar duplicados: " + error.message);
@@ -662,7 +682,6 @@
             });
         }
 
-        // Búsqueda optimizada con retardo (debounce) para evitar que se cuelgue en móviles
         let searchTimeout;
         function debounceFilter(category) {
             clearTimeout(searchTimeout);

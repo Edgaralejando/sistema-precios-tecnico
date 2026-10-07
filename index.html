@@ -45,6 +45,55 @@
             text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
         }
 
+        .admin-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-tech);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .admin-panel h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-grid input, .form-grid select {
+            padding: 0.8rem;
+            background-color: #0d1322;
+            border: 1px solid var(--border-tech);
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .form-grid input:focus, .form-grid select:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-add {
+            background-color: var(--accent);
+            color: #090d16;
+            font-weight: 700;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .btn-add:hover { opacity: 0.9; }
+
         .tabs {
             display: flex;
             justify-content: center;
@@ -63,19 +112,12 @@
             cursor: pointer;
             color: var(--text-muted);
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
 
-        .tab-btn:hover {
+        .tab-btn:hover, .tab-btn.active {
             border-color: var(--primary);
             color: var(--primary);
-        }
-
-        .tab-btn.active {
             background-color: var(--primary-glow);
-            border-color: var(--primary);
-            color: var(--primary);
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
         }
 
         .catalog-section {
@@ -85,15 +127,9 @@
             padding: 2rem;
             border-radius: 12px;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.4s ease-in-out;
         }
 
         .catalog-section.active { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
 
         .search-box { margin-bottom: 1.5rem; }
         
@@ -106,12 +142,6 @@
             border-radius: 8px;
             color: white;
             outline: none;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-
-        .search-box input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
         }
 
         .table-container { overflow-x: auto; }
@@ -133,22 +163,13 @@
             font-weight: 600;
             text-transform: uppercase;
             font-size: 0.8rem;
-            letter-spacing: 1px;
         }
 
-        td {
-            color: #d1d5db;
-            font-size: 0.95rem;
-        }
-
-        tr:hover td {
-            background-color: rgba(56, 189, 248, 0.02);
-        }
+        td { color: #d1d5db; font-size: 0.95rem; }
 
         .price-tag {
             font-weight: 700;
             color: var(--accent);
-            text-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
         }
     </style>
 </head>
@@ -157,6 +178,22 @@
         <header>
             <h1>PC MASTER PRECIOS</h1>
         </header>
+
+        <!-- Panel para agregar ítems a la base de datos en la nube -->
+        <div class="admin-panel">
+            <h3>➕ Agregar Nuevo Ítem a la Nube</h3>
+            <div class="form-grid">
+                <select id="nuevo-categoria">
+                    <option value="celulares">Celulares</option>
+                    <option value="consolas">Consolas</option>
+                    <option value="computadoras">Computadoras</option>
+                </select>
+                <input type="text" id="nuevo-item" placeholder="Marca (Ej: HUAWEI, XIAOMI)">
+                <input type="text" id="nuevo-detalle" placeholder="Detalle (Ej: Pantalla OLED S/M)">
+                <input type="text" id="nuevo-precio" placeholder="Precio (Ej: $25.000 o Consultar)">
+            </div>
+            <button class="btn-add" onclick="agregarItemBD()">Guardar en la Base de Datos</button>
+        </div>
 
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('celulares')">📱 Celulares</button>
@@ -180,31 +217,83 @@
         </div>
     </div>
 
-    <script>
-        let datosGlobales = {};
+    <!-- SDK de Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        async function cargarDatos() {
+        // ⚠️ REEMPLAZA ESTO CON TUS CREDENCIALES REALES DE FIREBASE
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "tu-proyecto.firebaseapp.com",
+            projectId: "tu-proyecto",
+            storageBucket: "tu-proyecto.appspot.com",
+            messagingSenderId: "tu_id",
+            appId: "tu_app_id"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.cargarDatosBD = async function() {
             try {
-                const response = await fetch('datos.json');
-                datosGlobales = await response.json();
-                renderTablas();
-            } catch (error) {
-                console.error("Error al cargar los precios:", error);
-            }
-        }
+                const querySnapshot = await getDocs(collection(db, "precios"));
+                let datosGlobales = { celulares: [], consolas: [], computadoras: [] };
 
-        function renderTablas() {
-            ['celulares', 'consolas', 'computadoras'].forEach(cat => {
-                const tbody = document.querySelector(`#table-${cat} tbody`);
-                tbody.innerHTML = "";
-                if (datosGlobales[cat]) {
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (datosGlobales[data.categoria]) {
+                        datosGlobales[data.categoria].push(data);
+                    }
+                });
+
+                ['celulares', 'consolas', 'computadoras'].forEach(cat => {
+                    const tbody = document.querySelector(`#table-${cat} tbody`);
+                    tbody.innerHTML = "";
                     datosGlobales[cat].forEach(row => {
                         tbody.innerHTML += `<tr><td>${row.item}</td><td>${row.detalle}</td><td class="price-tag">${row.precio}</td></tr>`;
                     });
-                }
-            });
-        }
+                });
+            } catch (error) {
+                console.error("Error al cargar la base de datos:", error);
+            }
+        };
 
+        window.agregarItemBD = async function() {
+            const categoria = document.getElementById('nuevo-categoria').value;
+            const item = document.getElementById('nuevo-item').value.trim();
+            const detalle = document.getElementById('nuevo-detalle').value.trim();
+            const precio = document.getElementById('nuevo-precio').value.trim();
+
+            if (!item || !detalle || !precio) {
+                alert("Por favor completa todos los campos.");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "precios"), {
+                    categoria,
+                    item,
+                    detalle,
+                    precio,
+                    fecha: new Date()
+                });
+
+                alert("¡Ítem guardado permanentemente en la nube!");
+                document.getElementById('nuevo-item').value = "";
+                document.getElementById('nuevo-detalle').value = "";
+                document.getElementById('nuevo-precio').value = "";
+                window.cargarDatosBD();
+            } catch (error) {
+                alert("Error al guardar en la base de datos: " + error.message);
+                console.error(error);
+            }
+        };
+
+        window.cargarDatosBD();
+    </script>
+
+    <script>
         function switchTab(category) {
             document.querySelectorAll('.catalog-section').forEach(sec => sec.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -220,8 +309,6 @@
                 row.style.display = text.includes(filter) ? "" : "none";
             });
         }
-
-        cargarDatos();
     </script>
 </body>
 </html>

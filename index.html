@@ -112,19 +112,8 @@
         }
         .btn-bulk:hover { opacity: 0.9; }
 
-        .btn-clear {
-            background-color: #ef4444;
-            color: white;
-            font-weight: 700;
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .btn-clear:hover { opacity: 0.9; }
-
         .btn-cancel {
-            background-color: #6b7280;
+            background-color: #ef4444;
             color: white;
             font-weight: 700;
             padding: 0.8rem 1.5rem;
@@ -158,6 +147,31 @@
             border-color: var(--primary);
             color: var(--primary);
             background-color: var(--primary-glow);
+        }
+
+        .sub-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .sub-tab-btn {
+            background-color: #0d1322;
+            border: 1px solid var(--border-tech);
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .sub-tab-btn:hover, .sub-tab-btn.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background-color: rgba(16, 185, 129, 0.1);
         }
 
         .catalog-section {
@@ -231,24 +245,30 @@
             <h1>PC MASTER PRECIOS</h1>
         </header>
 
-        <!-- Panel para agregar o modificar ítems -->
         <div class="admin-panel">
             <h3 id="panel-titulo">➕ Agregar Nuevo Ítem a la Nube</h3>
             <input type="hidden" id="edit-id">
             <div class="form-grid">
-                <select id="nuevo-categoria">
+                <select id="nuevo-categoria" onchange="toggleSubcategoria()">
                     <option value="celulares">Celulares</option>
                     <option value="consolas">Consolas</option>
                     <option value="computadoras">Computadoras</option>
                 </select>
+                <select id="nuevo-subcategoria">
+                    <option value="Pantallas">Pantallas</option>
+                    <option value="Baterias">Baterías</option>
+                    <option value="Puertos de carga">Puertos de carga</option>
+                    <option value="Parlantes">Parlantes</option>
+                    <option value="Camaras">Cámaras</option>
+                    <option value="Tapas traseras">Tapas traseras</option>
+                </select>
                 <input type="text" id="nuevo-item" placeholder="Marca (Ej: HUAWEI, XIAOMI)">
-                <input type="text" id="nuevo-detalle" placeholder="Detalle (Ej: Pantalla OLED S/M)">
+                <input type="text" id="nuevo-detalle" placeholder="Detalle (Ej: IPHONE 6 S/M)">
                 <input type="text" id="nuevo-precio" placeholder="Precio (Ej: $25.000 o Consultar)">
             </div>
             <div class="panel-actions">
                 <button class="btn-add" id="btn-accion" onclick="guardarItemBD()">Guardar en la Base de Datos</button>
-                <button class="btn-bulk" onclick="cargarProductosMasivos()">🚀 Cargar todos los productos masivamente</button>
-                <button class="btn-clear" onclick="limpiarBaseDatosCompleta()">🧹 Limpiar toda la Base de Datos</button>
+                <button class="btn-bulk" onclick="cargarProductosMasivos()">🚀 Cargar pendientes a Firebase</button>
                 <button class="btn-cancel" id="btn-cancelar" onclick="limpiarFormulario()">Cancelar Edición</button>
             </div>
         </div>
@@ -260,25 +280,33 @@
         </div>
 
         <div id="celulares" class="catalog-section active">
-            <div class="search-box"><input type="text" id="search-celulares" placeholder="Buscar componente o modelo en celulares..." oninput="filterTable('celulares')"></div>
+            <div class="sub-tabs">
+                <button class="sub-tab-btn active" onclick="filterSubcat('todos', this)">Todos</button>
+                <button class="sub-tab-btn" onclick="filterSubcat('Pantallas', this)">Pantallas</button>
+                <button class="sub-tab-btn" onclick="filterSubcat('Baterias', this)">Baterías</button>
+                <button class="sub-tab-btn" onclick="filterSubcat('Puertos de carga', this)">Puertos de carga</button>
+                <button class="sub-tab-btn" onclick="filterSubcat('Parlantes', this)">Parlantes</button>
+                <button class="sub-tab-btn" onclick="filterSubcat('Camaras', this)">Cámaras</button>
+                <button class="sub-tab-btn" onclick="filterSubcat('Tapas traseras', this)">Tapas traseras</button>
+            </div>
+            <div class="search-box"><input type="text" id="search-celulares" placeholder="Buscar componente o modelo en celulares..." onkeyup="filterTable('celulares')"></div>
             <div class="table-container"><table id="table-celulares"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
         </div>
 
         <div id="consolas" class="catalog-section">
-            <div class="search-box"><input type="text" id="search-consolas" placeholder="Buscar componente o modelo en consolas..." oninput="filterTable('consolas')"></div>
+            <div class="search-box"><input type="text" id="search-consolas" placeholder="Buscar componente o modelo en consolas..." onkeyup="filterTable('consolas')"></div>
             <div class="table-container"><table id="table-consolas"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
         </div>
 
         <div id="computadoras" class="catalog-section">
-            <div class="search-box"><input type="text" id="search-computadoras" placeholder="Buscar componente o modelo en computadoras..." oninput="filterTable('computadoras')"></div>
+            <div class="search-box"><input type="text" id="search-computadoras" placeholder="Buscar componente o modelo en computadoras..." onkeyup="filterTable('computadoras')"></div>
             <div class="table-container"><table id="table-computadoras"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
         </div>
     </div>
 
-    <!-- SDK de Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCabrm6iqHIgjNb-UUb8xxJm9-Hri-q0Gk",
@@ -294,6 +322,13 @@
         const db = getFirestore(app);
 
         window.datosMemoria = {};
+        window.subcatActual = 'todos';
+
+        window.toggleSubcategoria = function() {
+            const cat = document.getElementById('nuevo-categoria').value;
+            const subcatSelect = document.getElementById('nuevo-subcategoria');
+            subcatSelect.style.display = (cat === 'celulares') ? 'inline-block' : 'none';
+        };
 
         window.cargarDatosBD = async function() {
             try {
@@ -312,47 +347,28 @@
 
                 ['celulares', 'consolas', 'computadoras'].forEach(cat => {
                     const tbody = document.querySelector(`#table-${cat} tbody`);
-                    let htmlContent = "";
+                    tbody.innerHTML = "";
                     datosGlobales[cat].forEach(row => {
-                        htmlContent += `
-                            <tr>
+                        const subcatAttr = row.subcategoria ? row.subcategoria : 'Pantallas';
+                        tbody.innerHTML += `
+                            <tr data-subcat="${subcatAttr}">
                                 <td>${row.item}</td>
                                 <td>${row.detalle}</td>
                                 <td class="price-tag">${row.precio}</td>
                                 <td><button class="btn-edit" onclick="prepararEdicion('${row.id}')">✏️ Editar</button></td>
                             </tr>`;
                     });
-                    tbody.innerHTML = htmlContent;
                 });
+                filterSubcat(window.subcatActual);
             } catch (error) {
                 console.error("Error al cargar la base de datos:", error);
-            }
-        };
-
-        // Función para limpiar/borrar TODOS los documentos de Firebase de golpe
-        window.limpiarBaseDatosCompleta = async function() {
-            if (!confirm("⚠️ ¡ADVERTENCIA! ¿Estás seguro de borrar TODOS los productos de la base de datos? Esta acción no se puede deshacer.")) return;
-
-            try {
-                const querySnapshot = await getDocs(collection(db, "precios"));
-                let promesasBorrado = [];
-
-                querySnapshot.forEach((documento) => {
-                    promesasBorrado.push(deleteDoc(doc(db, "precios", documento.id)));
-                });
-
-                await Promise.all(promesasBorrado);
-                alert("¡Base de datos limpiada con éxito! Ahora puedes cargar los productos limpios.");
-                window.cargarDatosBD();
-            } catch (error) {
-                alert("Error al limpiar la base de datos: " + error.message);
-                console.error(error);
             }
         };
 
         window.guardarItemBD = async function() {
             const editId = document.getElementById('edit-id').value;
             const categoria = document.getElementById('nuevo-categoria').value;
+            const subcategoria = (categoria === 'celulares') ? document.getElementById('nuevo-subcategoria').value : '';
             const item = document.getElementById('nuevo-item').value.trim();
             const detalle = document.getElementById('nuevo-detalle').value.trim();
             const precio = document.getElementById('nuevo-precio').value.trim();
@@ -365,11 +381,12 @@
             try {
                 if (editId) {
                     const docRef = doc(db, "precios", editId);
-                    await updateDoc(docRef, { categoria, item, detalle, precio });
+                    await updateDoc(docRef, { categoria, subcategoria, item, detalle, precio });
                     alert("¡Ítem actualizado correctamente en la nube!");
                 } else {
                     await addDoc(collection(db, "precios"), {
                         categoria,
+                        subcategoria,
                         item,
                         detalle,
                         precio,
@@ -386,148 +403,164 @@
             }
         };
 
+        // Carga masiva inteligente: solo añade lo que no exista previamente en la base de datos
         window.cargarProductosMasivos = async function() {
-            if (!confirm("¿Estás seguro de cargar todos los productos masivamente a la base de datos?")) return;
+            if (!confirm("¿Deseas cargar los productos faltantes a la base de datos? (No se duplicarán los existentes)")) return;
 
             const listaProductos = [
-                { categoria: "celulares", item: "APPLE", detalle: "Pantalla IPHONE 6", precio: "$28.000" },
-                { categoria: "celulares", item: "APPLE", detalle: "Pantalla IPHONE 7", precio: "$29.000" },
-                { categoria: "celulares", item: "APPLE", detalle: "Pantalla IPHONE 8", precio: "$28.000" },
-                { categoria: "celulares", item: "APPLE", detalle: "Pantalla IPHONE XR", precio: "$40.000" },
-                { categoria: "celulares", item: "APPLE", detalle: "Pantalla IPHONE 11", precio: "$40.000" },
-                { categoria: "celulares", item: "APPLE", detalle: "Pantalla IPHONE 12 INCELL", precio: "$55.000" },
-                { categoria: "celulares", item: "APPLE", detalle: "Pantalla IPHONE 12 OLED", precio: "$90.000" },
-                { categoria: "celulares", item: "APPLE", detalle: "Pantalla IPHONE 13 INCELL", precio: "$60.000" },
-                { categoria: "celulares", item: "APPLE", detalle: "Pantalla IPHONE 13 OLED", precio: "$92.000" },
-                { categoria: "celulares", item: "HUAWEI", detalle: "Pantalla P20 LITE ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "HUAWEI", detalle: "Pantalla MATE 20 LITE ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "HUAWEI", detalle: "Pantalla Y7 2019 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "HUAWEI", detalle: "Pantalla Y6 2019 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "HUAWEI", detalle: "Pantalla X6S ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "HUAWEI", detalle: "Pantalla Y7A ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "HONOR", detalle: "Pantalla 90 SMART ORIGINAL", precio: "$30.000" },
-                { categoria: "celulares", item: "HONOR", detalle: "Pantalla 70 LITE ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "HONOR", detalle: "Pantalla X6A ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "HONOR", detalle: "Pantalla X6S ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "HONOR", detalle: "Pantalla X7A ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "XIAOMI", detalle: "Pantalla REDMI NOTE 10 4G INCELL", precio: "$30.000" },
-                { categoria: "celulares", item: "XIAOMI", detalle: "Pantalla REDMI NOTE 10 5G ORIG HD+ YZ", precio: "$30.000" },
-                { categoria: "celulares", item: "XIAOMI", detalle: "Pantalla REDMI 10 4G ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "XIAOMI", detalle: "Pantalla REDMI 10 ORIG HD+ YZ", precio: "$30.000" },
-                { categoria: "celulares", item: "XIAOMI", detalle: "Pantalla REDMI 9C ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "XIAOMI", detalle: "Pantalla REDMI 9 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "XIAOMI", detalle: "Pantalla REDMI A3 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "XIAOMI", detalle: "Pantalla REDMI A2 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "XIAOMI", detalle: "Pantalla REDMI A1 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "XIAOMI", detalle: "Pantalla POCO M3 ORIG HD+ YZ", precio: "$30.000" },
-                { categoria: "celulares", item: "XIAOMI", detalle: "Pantalla POCO M3 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "XIAOMI", detalle: "Pantalla POCO C61 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A70 INCELL C/MARCO", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A51 INCELL C/MARCO", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A32 5G ORIG SW C/MARCO", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A32 INCELL C/MARCO", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A31 INCELL HD 6.4 C/MARCO", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A30 INCELL C/MARCO", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A25 ORIGINAL C/MARCO", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A23 4G ORIG SW S/M", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A22 5G ORIGINAL S/M", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A21S ORIG SW S/M", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A20 ORIG SW C/MARCO", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A16 4G OLED C/MARCO", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A15 ORIGINAL C/MARCO", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A14 5G ORIG HD+ YZ S/M", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A14 4G ORIG S/M", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A13 4G ORIG SW C/MARCO FULL", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A13 4G ORIG SW S/M", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A12 ORIG SW S/M", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A11 ORIG SW S/M", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A03 ORIG SW S/M", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A02 ORIGINAL SW S/M", precio: "$30.000" },
-                { categoria: "celulares", item: "SAMSUNG", detalle: "Pantalla A01 ORIG SW S/M", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G55 HP", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G54 HP", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G53 HP C/MARCO", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G52 ORIGINAL", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G50 5G ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G35 ORIGINAL YZ", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G34 HP", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G31 INCELL", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G30 HP S/M", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G24 ORIG", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G24 POWER ORIG", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G23 HP", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G22 ORIG HD+ YZ", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G20 HP C/MARCO", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G20 HP S/M", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G15 / G15 POWER ORIGINAL YZ", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G15 HP", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G15 POWER HP", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G14 HP C/MARCO", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G14 HP", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G13 HP", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G10 HP S/M", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G04 / G04 POWER ORIGINAL YZ", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G04S / G05 ORIGINAL YZ", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G04S HP", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G04 ORIG", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G04S ORIG", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G5 POWER HP", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G9 PLUS HP", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G9 PLAY ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G8 PLAY HP", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G8 POWER LITE HP", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G7 PLUS", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G7 PLAY", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G7", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G6", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO G6 PLAY", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO E22 / F22 ORIG HD+ YZ", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO E20", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO E14 HP", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO E13 HP", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO E7 HP", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO E6 PLUS", precio: "$30.000" },
-                { categoria: "celulares", item: "MOTOROLA", detalle: "Pantalla MOTO E6", precio: "$30.000" },
-                { categoria: "celulares", item: "LG", detalle: "Pantalla K62", precio: "$30.000" },
-                { categoria: "celulares", item: "LG", detalle: "Pantalla G52", precio: "$30.000" },
-                { categoria: "celulares", item: "LG", detalle: "Pantalla K51S", precio: "$30.000" },
-                { categoria: "celulares", item: "LG", detalle: "Pantalla K42", precio: "$30.000" },
-                { categoria: "celulares", item: "LG", detalle: "Pantalla K50S", precio: "$30.000" },
-                { categoria: "celulares", item: "NOKIA", detalle: "Pantalla NOKIA 6", precio: "$30.000" },
-                { categoria: "celulares", item: "NOKIA", detalle: "Pantalla NOKIA 3.1 PLUS", precio: "$30.000" },
-                { categoria: "celulares", item: "VIVO", detalle: "Pantalla Y03 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "VIVO", detalle: "Pantalla Y17 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "VIVO", detalle: "Pantalla Y16 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "VIVO", detalle: "Pantalla Y15 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "VIVO", detalle: "Pantalla Y20 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "VIVO", detalle: "Pantalla Y21 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "VIVO", detalle: "Pantalla Y22 / Y22S ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "VIVO", detalle: "Pantalla Y27 5G ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "VIVO", detalle: "Pantalla Y31 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "VIVO", detalle: "Pantalla Y35 5G ORIG HD+ YZ", precio: "$30.000" },
-                { categoria: "celulares", item: "VIVO", detalle: "Pantalla Y36 5G ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "VIVO", detalle: "Pantalla Y51 ORIGINAL YZ", precio: "$30.000" },
-                { categoria: "celulares", item: "VIVO", detalle: "Pantalla Y55 5G HP", precio: "$30.000" },
-                { categoria: "celulares", item: "OPPO", detalle: "Pantalla OPPO A18 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "OPPO", detalle: "Pantalla OPPO A38 ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "OPPO", detalle: "Pantalla OPPO A40 4G ORIG SW", precio: "$30.000" },
-                { categoria: "celulares", item: "OPPO", detalle: "Pantalla OPPO A58 4G ORIG SW", precio: "$30.000" }
+                { categoria: "celulares", subcategoria: "Pantallas", item: "APPLE", detalle: "IPHONE 6", precio: "$28.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "APPLE", detalle: "IPHONE 7", precio: "$29.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "APPLE", detalle: "IPHONE 8", precio: "$28.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "APPLE", detalle: "IPHONE XR", precio: "$40.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "APPLE", detalle: "IPHONE 11", precio: "$40.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "APPLE", detalle: "IPHONE 12 INCELL", precio: "$55.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "APPLE", detalle: "IPHONE 12 OLED", precio: "$90.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "APPLE", detalle: "IPHONE 13 INCELL", precio: "$60.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "APPLE", detalle: "IPHONE 13 OLED", precio: "$92.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "HUAWEI", detalle: "P20 LITE ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "HUAWEI", detalle: "MATE 20 LITE ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "HUAWEI", detalle: "Y7 2019 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "HUAWEI", detalle: "Y6 2019 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "HUAWEI", detalle: "X6S ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "HUAWEI", detalle: "Y7A ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "HONOR", detalle: "90 SMART ORIGINAL", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "HONOR", detalle: "70 LITE ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "HONOR", detalle: "X6A ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "HONOR", detalle: "X6S ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "HONOR", detalle: "X7A ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "XIAOMI", detalle: "REDMI NOTE 10 4G INCELL", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "XIAOMI", detalle: "REDMI NOTE 10 5G ORIG HD+ YZ", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "XIAOMI", detalle: "REDMI 10 4G ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "XIAOMI", detalle: "REDMI 10 ORIG HD+ YZ", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "XIAOMI", detalle: "REDMI 9C ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "XIAOMI", detalle: "REDMI 9 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "XIAOMI", detalle: "REDMI A3 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "XIAOMI", detalle: "REDMI A2 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "XIAOMI", detalle: "REDMI A1 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "XIAOMI", detalle: "POCO M3 ORIG HD+ YZ", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "XIAOMI", detalle: "POCO M3 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "XIAOMI", detalle: "POCO C61 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A70 INCELL C/MARCO", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A51 INCELL C/MARCO", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A32 5G ORIG SW C/MARCO", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A32 INCELL C/MARCO", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A31 INCELL HD 6.4 C/MARCO", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A30 INCELL C/MARCO", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A25 ORIGINAL C/MARCO", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A23 4G ORIG SW S/M", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A22 5G ORIGINAL S/M", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A21S ORIG SW S/M", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A20 ORIG SW C/MARCO", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A16 4G OLED C/MARCO", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A15 ORIGINAL C/MARCO", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A14 5G ORIG HD+ YZ S/M", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A14 4G ORIG S/M", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A13 4G ORIG SW C/MARCO FULL", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A13 4G ORIG SW S/M", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A12 ORIG SW S/M", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A11 ORIG SW S/M", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A03 ORIG SW S/M", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A02 ORIGINAL SW S/M", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "SAMSUNG", detalle: "A01 ORIG SW S/M", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G55 HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G54 HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G53 HP C/MARCO", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G52 ORIGINAL", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G50 5G ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G35 ORIGINAL YZ", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G34 HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G31 INCELL", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G30 HP S/M", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G24 ORIG", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G24 POWER ORIG", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G23 HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G22 ORIG HD+ YZ", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G20 HP C/MARCO", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G20 HP S/M", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G15 / G15 POWER ORIGINAL YZ", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G15 HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G15 POWER HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G14 HP C/MARCO", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G14 HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G13 HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G10 HP S/M", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G04 / G04 POWER ORIGINAL YZ", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G04S / G05 ORIGINAL YZ", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G04S HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G04 ORIG", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G04S ORIG", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G5 POWER HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G9 PLUS HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G9 PLAY ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G8 PLAY HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G8 POWER LITE HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G7 PLUS", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G7 PLAY", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G7", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G6", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO G6 PLAY", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO E22 / F22 ORIG HD+ YZ", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO E20", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO E14 HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO E13 HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO E7 HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO E6 PLUS", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "MOTOROLA", detalle: "MOTO E6", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "LG", detalle: "K62", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "LG", detalle: "G52", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "LG", detalle: "K51S", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "LG", detalle: "K42", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "LG", detalle: "K50S", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "NOKIA", detalle: "NOKIA 6", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "NOKIA", detalle: "NOKIA 3.1 PLUS", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "VIVO", detalle: "Y03 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "VIVO", detalle: "Y17 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "VIVO", detalle: "Y16 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "VIVO", detalle: "Y15 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "VIVO", detalle: "Y20 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "VIVO", detalle: "Y21 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "VIVO", detalle: "Y22 / Y22S ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "VIVO", detalle: "Y27 5G ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "VIVO", detalle: "Y31 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "VIVO", detalle: "Y35 5G ORIG HD+ YZ", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "VIVO", detalle: "Y36 5G ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "VIVO", detalle: "Y51 ORIGINAL YZ", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "VIVO", detalle: "Y55 5G HP", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "OPPO", detalle: "OPPO A18 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "OPPO", detalle: "OPPO A38 ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "OPPO", detalle: "OPPO A40 4G ORIG SW", precio: "$30.000" },
+                { categoria: "celulares", subcategoria: "Pantallas", item: "OPPO", detalle: "OPPO A58 4G ORIG SW", precio: "$30.000" }
             ];
 
             try {
+                // Obtenemos los registros existentes para comparar y evitar duplicados
+                const querySnapshot = await getDocs(collection(db, "precios"));
+                const existentes = new Set();
+                querySnapshot.forEach(doc => {
+                    const d = doc.data();
+                    existentes.add(`${d.categoria}_${d.subcat || d.subcategoria || ''}_${d.item}_${d.detalle}`.toLowerCase());
+                });
+
+                let agregados = 0;
                 for (let prod of listaProductos) {
-                    await addDoc(collection(db, "precios"), {
-                        categoria: prod.categoria,
-                        item: prod.item,
-                        detalle: prod.detalle,
-                        precio: prod.precio,
-                        fecha: new Date()
-                    });
+                    const clave = `${prod.categoria}_${prod.subcategoria}_${prod.item}_${prod.detalle}`.toLowerCase();
+                    if (!existentes.has(clave)) {
+                        await addDoc(collection(db, "precios"), {
+                            categoria: prod.categoria,
+                            subcategoria: prod.subcategoria,
+                            item: prod.item,
+                            detalle: prod.detalle,
+                            precio: prod.precio,
+                            fecha: new Date()
+                        });
+                        agregados++;
+                    }
                 }
-                alert("¡Todos los productos fueron cargados exitosamente a Firebase!");
+
+                alert(`¡Proceso completado! Se agregaron ${agregados} productos nuevos (sin duplicar los existentes).`);
                 window.cargarDatosBD();
             } catch (err) {
-                alert("Error al cargar masivamente: " + err.message);
+                alert("Error en la carga masiva: " + err.message);
                 console.error(err);
             }
         };
@@ -538,6 +571,10 @@
 
             document.getElementById('edit-id').value = id;
             document.getElementById('nuevo-categoria').value = data.categoria;
+            window.toggleSubcategoria();
+            if (data.categoria === 'celulares') {
+                document.getElementById('nuevo-subcategoria').value = data.subcategoria || 'Pantallas';
+            }
             document.getElementById('nuevo-item').value = data.item;
             document.getElementById('nuevo-detalle').value = data.detalle;
             document.getElementById('nuevo-precio').value = data.precio;
@@ -569,15 +606,31 @@
             event.currentTarget.classList.add('active');
         }
 
+        function filterSubcat(subcat, btnElement) {
+            window.subcatActual = subcat;
+            if (btnElement) {
+                document.querySelectorAll('#celulares .sub-tab-btn').forEach(b => b.classList.remove('active'));
+                btnElement.classList.add('active');
+            }
+            const rows = document.querySelectorAll('#table-celulares tbody tr');
+            rows.forEach(row => {
+                const rowSubcat = row.getAttribute('data-subcat');
+                if (subcat === 'todos' || rowSubcat === subcat) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
         function filterTable(category) {
             const filter = document.getElementById(`search-${category}`).value.toLowerCase();
             const tr = document.querySelectorAll(`#table-${category} tbody tr`);
-            
-            requestAnimationFrame(() => {
-                tr.forEach(row => {
-                    const text = row.innerText.toLowerCase();
-                    row.style.display = text.includes(filter) ? "" : "none";
-                });
+            tr.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                const matchesSearch = text.includes(filter);
+                const matchesSubcat = (category !== 'celulares' || window.subcatActual === 'todos' || row.getAttribute('data-subcat') === window.subcatActual);
+                row.style.display = (matchesSearch && matchesSubcat) ? "" : "none";
             });
         }
     </script>

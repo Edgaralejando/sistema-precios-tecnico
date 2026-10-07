@@ -248,17 +248,17 @@
         </div>
 
         <div id="celulares" class="catalog-section active">
-            <div class="search-box"><input type="text" id="search-celulares" placeholder="Buscar componente o modelo en celulares..." onkeyup="filterTable('celulares')"></div>
+            <div class="search-box"><input type="text" id="search-celulares" placeholder="Buscar componente o modelo en celulares..." oninput="filterTable('celulares')"></div>
             <div class="table-container"><table id="table-celulares"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
         </div>
 
         <div id="consolas" class="catalog-section">
-            <div class="search-box"><input type="text" id="search-consolas" placeholder="Buscar componente o modelo en consolas..." onkeyup="filterTable('consolas')"></div>
+            <div class="search-box"><input type="text" id="search-consolas" placeholder="Buscar componente o modelo en consolas..." oninput="filterTable('consolas')"></div>
             <div class="table-container"><table id="table-consolas"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
         </div>
 
         <div id="computadoras" class="catalog-section">
-            <div class="search-box"><input type="text" id="search-computadoras" placeholder="Buscar componente o modelo en computadoras..." onkeyup="filterTable('computadoras')"></div>
+            <div class="search-box"><input type="text" id="search-computadoras" placeholder="Buscar componente o modelo en computadoras..." oninput="filterTable('computadoras')"></div>
             <div class="table-container"><table id="table-computadoras"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
         </div>
     </div>
@@ -281,7 +281,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Almacenamiento local temporal para ubicar datos al editar
         window.datosMemoria = {};
 
         window.cargarDatosBD = async function() {
@@ -301,9 +300,9 @@
 
                 ['celulares', 'consolas', 'computadoras'].forEach(cat => {
                     const tbody = document.querySelector(`#table-${cat} tbody`);
-                    tbody.innerHTML = "";
+                    let htmlContent = "";
                     datosGlobales[cat].forEach(row => {
-                        tbody.innerHTML += `
+                        htmlContent += `
                             <tr>
                                 <td>${row.item}</td>
                                 <td>${row.detalle}</td>
@@ -311,6 +310,7 @@
                                 <td><button class="btn-edit" onclick="prepararEdicion('${row.id}')">✏️ Editar</button></td>
                             </tr>`;
                     });
+                    tbody.innerHTML = htmlContent;
                 });
             } catch (error) {
                 console.error("Error al cargar la base de datos:", error);
@@ -353,12 +353,10 @@
             }
         };
 
-        // Función para cargar masivamente todos los productos distribuidos en sus respectivas categorías
         window.cargarProductosMasivos = async function() {
             if (!confirm("¿Estás seguro de cargar todos los productos masivamente a la base de datos?")) return;
 
             const listaProductos = [
-                // --- CELULARES ---
                 { categoria: "celulares", item: "APPLE", detalle: "Pantalla IPHONE 6", precio: "$28.000" },
                 { categoria: "celulares", item: "APPLE", detalle: "Pantalla IPHONE 7", precio: "$29.000" },
                 { categoria: "celulares", item: "APPLE", detalle: "Pantalla IPHONE 8", precio: "$28.000" },
@@ -538,12 +536,16 @@
             event.currentTarget.classList.add('active');
         }
 
+        // Búsqueda optimizada para que no se congele el navegador
         function filterTable(category) {
             const filter = document.getElementById(`search-${category}`).value.toLowerCase();
             const tr = document.querySelectorAll(`#table-${category} tbody tr`);
-            tr.forEach(row => {
-                const text = row.innerText.toLowerCase();
-                row.style.display = text.includes(filter) ? "" : "none";
+            
+            requestAnimationFrame(() => {
+                tr.forEach(row => {
+                    const text = row.innerText.toLowerCase();
+                    row.style.display = text.includes(filter) ? "" : "none";
+                });
             });
         }
     </script>

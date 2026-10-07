@@ -3,359 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PC MASTER PRECIOS</title>
-    <style>
-        :root {
-            --bg-deep: #090d16;
-            --bg-card: #111827;
-            --border-tech: #1f293d;
-            --primary: #38bdf8;
-            --primary-glow: rgba(56, 189, 248, 0.15);
-            --accent: #10b981;
-            --warning: #f59e0b;
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        
-        body {
-            background-color: var(--bg-deep);
-            color: var(--text-main);
-            padding: 2.5rem 1rem;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
-            min-height: 100vh;
-        }
-
-        .container { max-width: 1100px; margin: 0 auto; }
-
-        header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-            border-bottom: 1px solid var(--border-tech);
-            padding-bottom: 1.5rem;
-        }
-
-        header h1 {
-            color: var(--primary);
-            font-size: 2.5rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
-        }
-
-        .admin-panel {
-            background: var(--bg-card);
-            border: 1px solid var(--border-tech);
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-        }
-
-        .admin-panel h3 {
-            color: var(--primary);
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .form-grid input, .form-grid select {
-            padding: 0.8rem;
-            background-color: #0d1322;
-            border: 1px solid var(--border-tech);
-            border-radius: 8px;
-            color: white;
-            font-size: 0.95rem;
-            outline: none;
-        }
-
-        .form-grid input:focus, .form-grid select:focus {
-            border-color: var(--primary);
-        }
-
-        .panel-actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .btn-add {
-            background-color: var(--accent);
-            color: #090d16;
-            font-weight: 700;
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: opacity 0.3s;
-        }
-
-        .btn-add:hover { opacity: 0.9; }
-
-        .btn-bulk {
-            background-color: #8b5cf6;
-            color: white;
-            font-weight: 700;
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .btn-bulk:hover { opacity: 0.9; }
-
-        .btn-cancel {
-            background-color: #ef4444;
-            color: white;
-            font-weight: 700;
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            display: none;
-        }
-
-        .tabs {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .tab-btn {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-tech);
-            padding: 0.8rem 1.8rem;
-            font-size: 0.95rem;
-            font-weight: 600;
-            border-radius: 6px;
-            cursor: pointer;
-            color: var(--text-muted);
-            transition: all 0.3s ease;
-        }
-
-        .tab-btn:hover, .tab-btn.active {
-            border-color: var(--primary);
-            color: var(--primary);
-            background-color: var(--primary-glow);
-        }
-
-        .catalog-section {
-            display: none;
-            background: var(--bg-card);
-            border: 1px solid var(--border-tech);
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-        }
-
-        .catalog-section.active { display: block; }
-
-        .search-box { margin-bottom: 1.5rem; }
-        
-        .search-box input {
-            width: 100%;
-            padding: 0.9rem 1.2rem;
-            font-size: 1rem;
-            background-color: #0d1322;
-            border: 1px solid var(--border-tech);
-            border-radius: 8px;
-            color: white;
-            outline: none;
-        }
-
-        .table-container { overflow-x: auto; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th, td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-tech);
-        }
-
-        th {
-            background-color: rgba(255, 255, 255, 0.02);
-            color: var(--primary);
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-        }
-
-        td { color: #d1d5db; font-size: 0.95rem; }
-
-        .price-tag {
-            font-weight: 700;
-            color: var(--accent);
-        }
-
-        .btn-edit {
-            background-color: var(--warning);
-            color: #090d16;
-            border: none;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.85rem;
-        }
-        .btn-edit:hover { opacity: 0.9; }
-    </style>
+    <title>Carga Masiva de Pantallas a Firebase</title>
+    <!-- Tailwind CSS para diseño rápido -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="container">
-        <header>
-            <h1>PC MASTER PRECIOS</h1>
-        </header>
-
-        <!-- Panel para agregar o modificar ítems -->
-        <div class="admin-panel">
-            <h3 id="panel-titulo">➕ Agregar Nuevo Ítem a la Nube</h3>
-            <input type="hidden" id="edit-id">
-            <div class="form-grid">
-                <select id="nuevo-categoria">
-                    <option value="celulares">Celulares</option>
-                    <option value="consolas">Consolas</option>
-                    <option value="computadoras">Computadoras</option>
-                </select>
-                <input type="text" id="nuevo-item" placeholder="Marca (Ej: HUAWEI, XIAOMI)">
-                <input type="text" id="nuevo-detalle" placeholder="Detalle (Ej: Pantalla OLED S/M)">
-                <input type="text" id="nuevo-precio" placeholder="Precio (Ej: $25.000 o Consultar)">
-            </div>
-            <div class="panel-actions">
-                <button class="btn-add" id="btn-accion" onclick="guardarItemBD()">Guardar en la Base de Datos</button>
-                <button class="btn-bulk" onclick="cargarProductosMasivos()">🚀 Cargar todos los productos masivamente a Firebase</button>
-                <button class="btn-cancel" id="btn-cancelar" onclick="limpiarFormulario()">Cancelar Edición</button>
-            </div>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold mb-4 text-gray-800">Administrador de Pantallas - Firebase</h1>
+        
+        <div class="mb-6 flex gap-4">
+            <button onclick="cargarProductosMasivos()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
+                🚀 Cargar todos los productos masivamente a Firebase
+            </button>
+            <button onclick="cargarDatosBD()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow transition">
+                🔄 Recargar Tabla
+            </button>
         </div>
 
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('celulares')">📱 Celulares</button>
-            <button class="tab-btn" onclick="switchTab('consolas')">🎮 Consolas</button>
-            <button class="tab-btn" onclick="switchTab('computadoras')">💻 Computadoras</button>
-        </div>
-
-        <div id="celulares" class="catalog-section active">
-            <div class="search-box"><input type="text" id="search-celulares" placeholder="Buscar componente o modelo en celulares..." onkeyup="filterTable('celulares')"></div>
-            <div class="table-container"><table id="table-celulares"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
-        </div>
-
-        <div id="consolas" class="catalog-section">
-            <div class="search-box"><input type="text" id="search-consolas" placeholder="Buscar componente o modelo en consolas..." onkeyup="filterTable('consolas')"></div>
-            <div class="table-container"><table id="table-consolas"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
-        </div>
-
-        <div id="computadoras" class="catalog-section">
-            <div class="search-box"><input type="text" id="search-computadoras" placeholder="Buscar componente o modelo en computadoras..." onkeyup="filterTable('computadoras')"></div>
-            <div class="table-container"><table id="table-computadoras"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-200">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                        <th class="py-3 px-6 text-left">Categoría</th>
+                        <th class="py-3 px-6 text-left">Marca / Item</th>
+                        <th class="py-3 px-6 text-left">Detalle</th>
+                        <th class="py-3 px-6 text-left">Precio</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-productos" class="text-gray-600 text-sm font-light">
+                    <!-- Los datos se cargarán aquí dinámicamente -->
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- SDK de Firebase -->
+    <!-- Scripts de Firebase (Asegúrate de ajustar tu configuración según tu proyecto) -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // CONFIGURA TUS CREDENCIALES DE FIREBASE AQUÍ
         const firebaseConfig = {
-            apiKey: "AIzaSyCabrm6iqHIgjNb-UUb8xxJm9-Hri-q0Gk",
-            authDomain: "pcmaster-inventario.firebaseapp.com",
-            projectId: "pcmaster-inventario",
-            storageBucket: "pcmaster-inventario.firebasestorage.app",
-            messagingSenderId: "669715767932",
-            appId: "1:669715767932:web:d0159c395da5b9cbcc5ff9",
-            measurementId: "G-E66162R6CV"
+            apiKey: "TU_API_KEY",
+            authDomain: "TU_AUTH_DOMAIN",
+            projectId: "TU_PROJECT_ID",
+            storageBucket: "TU_STORAGE_BUCKET",
+            messagingSenderId: "TU_MESSAGING_SENDER_ID",
+            appId: "TU_APP_ID"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Almacenamiento local temporal para ubicar datos al editar
-        window.datosMemoria = {};
-
-        window.cargarDatosBD = async function() {
-            try {
-                const querySnapshot = await getDocs(collection(db, "precios"));
-                window.datosMemoria = {};
-                let datosGlobales = { celulares: [], consolas: [], computadoras: [] };
-
-                querySnapshot.forEach((documento) => {
-                    const data = documento.data();
-                    const id = documento.id;
-                    window.datosMemoria[id] = data;
-                    if (datosGlobales[data.categoria]) {
-                        datosGlobales[data.categoria].push({ id, ...data });
-                    }
-                });
-
-                ['celulares', 'consolas', 'computadoras'].forEach(cat => {
-                    const tbody = document.querySelector(`#table-${cat} tbody`);
-                    tbody.innerHTML = "";
-                    datosGlobales[cat].forEach(row => {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>${row.item}</td>
-                                <td>${row.detalle}</td>
-                                <td class="price-tag">${row.precio}</td>
-                                <td><button class="btn-edit" onclick="prepararEdicion('${row.id}')">✏️ Editar</button></td>
-                            </tr>`;
-                    });
-                });
-            } catch (error) {
-                console.error("Error al cargar la base de datos:", error);
-            }
-        };
-
-        window.guardarItemBD = async function() {
-            const editId = document.getElementById('edit-id').value;
-            const categoria = document.getElementById('nuevo-categoria').value;
-            const item = document.getElementById('nuevo-item').value.trim();
-            const detalle = document.getElementById('nuevo-detalle').value.trim();
-            const precio = document.getElementById('nuevo-precio').value.trim();
-
-            if (!item || !detalle || !precio) {
-                alert("Por favor completa todos los campos.");
-                return;
-            }
-
-            try {
-                if (editId) {
-                    const docRef = doc(db, "precios", editId);
-                    await updateDoc(docRef, { categoria, item, detalle, precio });
-                    alert("¡Ítem actualizado correctamente en la nube!");
-                } else {
-                    await addDoc(collection(db, "precios"), {
-                        categoria,
-                        item,
-                        detalle,
-                        precio,
-                        fecha: new Date()
-                    });
-                    alert("¡Ítem guardado permanentemente en la nube!");
-                }
-
-                window.limpiarFormulario();
-                window.cargarDatosBD();
-            } catch (error) {
-                alert("Error en la base de datos: " + error.message);
-                console.error(error);
-            }
-        };
-
-        // Función para cargar masivamente todos los productos (con la palabra Pantalla en cada detalle)
+        // Función para cargar todos los productos masivamente
         window.cargarProductosMasivos = async function() {
-            if (!confirm("¿Estás seguro de cargar todos los productos masivamente a la base de datos?")) return;
+            if (!confirm("¿Estás seguro de cargar toda la lista de pantallas masivamente a la base de datos?")) return;
 
             const listaCelulares = [
                 { item: "APPLE", detalle: "Pantalla IPHONE 6", precio: "$28.000" },
@@ -496,55 +198,4 @@
                 window.cargarDatosBD();
             } catch (err) {
                 alert("Error al cargar masivamente: " + err.message);
-                console.error(err);
-            }
-        };
-
-        window.prepararEdicion = function(id) {
-            const data = window.datosMemoria[id];
-            if (!data) return;
-
-            document.getElementById('edit-id').value = id;
-            document.getElementById('nuevo-categoria').value = data.categoria;
-            document.getElementById('nuevo-item').value = data.item;
-            document.getElementById('nuevo-detalle').value = data.detalle;
-            document.getElementById('nuevo-precio').value = data.precio;
-
-            document.getElementById('panel-titulo').innerText = "✏️ Modificar Ítem Existente";
-            document.getElementById('btn-accion').innerText = "Actualizar en la Nube";
-            document.getElementById('btn-cancelar').style.display = "inline-block";
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
-        window.limpiarFormulario = function() {
-            document.getElementById('edit-id').value = "";
-            document.getElementById('nuevo-item').value = "";
-            document.getElementById('nuevo-detalle').value = "";
-            document.getElementById('nuevo-precio').value = "";
-            document.getElementById('panel-titulo').innerText = "➕ Agregar Nuevo Ítem a la Nube";
-            document.getElementById('btn-accion').innerText = "Guardar en la Base de Datos";
-            document.getElementById('btn-cancelar').style.display = "none";
-        };
-
-        window.cargarDatosBD();
-    </script>
-
-    <script>
-        function switchTab(category) {
-            document.querySelectorAll('.catalog-section').forEach(sec => sec.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(category).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
-
-        function filterTable(category) {
-            const filter = document.getElementById(`search-${category}`).value.toLowerCase();
-            const tr = document.querySelectorAll(`#table-${category} tbody tr`);
-            tr.forEach(row => {
-                const text = row.innerText.toLowerCase();
-                row.style.display = text.includes(filter) ? "" : "none";
-            });
-        }
-    </script>
-</body>
-</html>
+                console.er

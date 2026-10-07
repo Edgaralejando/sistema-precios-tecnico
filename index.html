@@ -13,6 +13,7 @@
             --primary-glow: rgba(56, 189, 248, 0.15);
             --accent: #10b981;
             --warning: #f59e0b;
+            --danger: #ef4444;
             --text-main: #f3f4f6;
             --text-muted: #9ca3af;
         }
@@ -124,7 +125,7 @@
         .btn-clean:hover { opacity: 0.9; }
 
         .btn-cancel {
-            background-color: #ef4444;
+            background-color: var(--danger);
             color: white;
             font-weight: 700;
             padding: 0.8rem 1.5rem;
@@ -237,6 +238,11 @@
             color: var(--accent);
         }
 
+        .actions-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
         .btn-edit {
             background-color: var(--warning);
             color: #090d16;
@@ -248,6 +254,18 @@
             font-size: 0.85rem;
         }
         .btn-edit:hover { opacity: 0.9; }
+
+        .btn-delete-row {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .btn-delete-row:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -280,7 +298,7 @@
             <div class="panel-actions">
                 <button class="btn-add" id="btn-accion" onclick="guardarItemBD()">Guardar en la Base de Datos</button>
                 <button class="btn-bulk" onclick="cargarProductosMasivos()">🚀 Cargar faltantes</button>
-                <button class="btn-clean" onclick="limpiarDuplicadosBD()">🧹 Limpieza Súper Inteligente</button>
+                <button class="btn-clean" onclick="limpiarDuplicadosExactosBD()">🧹 Borrar Copias Duplicadas Exactas</button>
                 <button class="btn-cancel" id="btn-cancelar" onclick="limpiarFormulario()">Cancelar Edición</button>
             </div>
         </div>
@@ -367,7 +385,12 @@
                                 <td>${row.item}</td>
                                 <td>${row.detalle}</td>
                                 <td class="price-tag">${row.precio}</td>
-                                <td><button class="btn-edit" onclick="prepararEdicion('${row.id}')">✏️ Editar</button></td>
+                                <td>
+                                    <div class="actions-group">
+                                        <button class="btn-edit" onclick="prepararEdicion('${row.id}')">✏️ Editar</button>
+                                        <button class="btn-delete-row" onclick="eliminarFilaIndividual('${row.id}')">🗑️ Borrar</button>
+                                    </div>
+                                </td>
                             </tr>`;
                     });
                 });
@@ -377,9 +400,20 @@
             }
         };
 
-        // Limpieza Súper Inteligente: Omite palabras como "pantalla", "oled", "incell" para detectar duplicados reales
-        window.limpiarDuplicadosBD = async function() {
-            if (!confirm("🧹 ¿Deseas ejecutar la Limpieza Súper Inteligente para unificar y borrar variaciones y duplicados?")) return;
+        // Borra una fila individual de forma rápida con el botón nuevo de la tabla
+        window.eliminarFilaIndividual = async function(id) {
+            if (!confirm("🗑️ ¿Estás seguro de eliminar este ítem específico?")) return;
+            try {
+                await deleteDoc(doc(db, "precios", id));
+                window.cargarDatosBD();
+            } catch (error) {
+                alert("Error al eliminar: " + error.message);
+            }
+        };
+
+        // Limpieza segura: Solo borra registros que sean 100% idénticos en categoría, subcategoría, marca, detalle y precio
+        window.limpiarDuplicadosExactosBD = async function() {
+            if (!confirm("🧹 ¿Deseas limpiar y eliminar las copias exactas repetidas en Firebase?")) return;
 
             try {
                 const querySnapshot = await getDocs(collection(db, "precios"));
@@ -389,36 +423,18 @@
                 for (const documento of querySnapshot.docs) {
                     const d = documento.data();
                     
-                    // Limpieza profunda de texto: quitamos tildes, espacios extra y palabras de relleno comunes
-                    let detalleLimpio = (d.detalle || '')
-                        .toLowerCase()
-                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita tildes
-                        .replace(/\bpantalla\b/g, '')
-                        .replace(/\bdisplay\b/g, '')
-                        .replace(/\blcd\b/g, '')
-                        .replace(/\boled\b/g, '')
-                        .replace(/\bincell\b/g, '')
-                        .replace(/\borig(inal)?\b/g, '')
-                        .replace(/\bs\/m\b/g, '')
-                        .replace(/\bc\/marco\b/g, '')
-                        .replace(/[^a-z0-9]/g, ''); // solo deja letras y números clave (ej: "iphone12")
+                    // Clave estricta basada en contenido exacto para no borrar productos que tienen precios/calidades distintas (ej: Incell vs Oled)
+                    const claveExacta = `${d.categoria || ''}_${d.subcategoria || ''}_${d.item || ''}_${d.detalle || ''}_${d.precio || ''}`.toLowerCase().trim();
 
-                    let itemLimpio = (d.item || '').toLowerCase().trim();
-                    let categoriaLimpia = (d.categoria || '').toLowerCase().trim();
-                    let subcatLimpia = (d.subcategoria || '').toLowerCase().trim();
-
-                    // Clave unificada súper inteligente
-                    const claveInteligente = `${categoriaLimpia}_${subcatLimpia}_${itemLimpio}_${detalleLimpio}`;
-
-                    if (vistos.has(claveInteligente)) {
+                    if (vistos.has(claveExacta)) {
                         await deleteDoc(doc(db, "precios", documento.id));
                         eliminados++;
                     } else {
-                        vistos.add(claveInteligente);
+                        vistos.add(claveExacta);
                     }
                 }
 
-                alert(`¡Limpieza completada con éxito! Se eliminaron ${eliminados} registros duplicados/variaciones.`);
+                alert(`¡Limpieza completada! Se eliminaron ${eliminados} copias idénticas repetidas.`);
                 window.cargarDatosBD();
             } catch (error) {
                 alert("Error al limpiar duplicados: " + error.message);
@@ -597,12 +613,12 @@
                 const existentes = new Set();
                 querySnapshot.forEach(doc => {
                     const d = doc.data();
-                    existentes.add(`${d.categoria}_${d.subcategoria || ''}_${d.item}_${d.detalle}`.toLowerCase());
+                    existentes.add(`${d.categoria}_${d.subcategoria || ''}_${d.item}_${d.detalle}_${d.precio}`.toLowerCase());
                 });
 
                 let agregados = 0;
                 for (let prod of listaProductos) {
-                    const clave = `${prod.categoria}_${prod.subcategoria}_${prod.item}_${prod.detalle}`.toLowerCase();
+                    const clave = `${prod.categoria}_${prod.subcategoria}_${prod.item}_${prod.detalle}_${prod.precio}`.toLowerCase();
                     if (!existentes.has(clave)) {
                         await addDoc(collection(db, "precios"), {
                             categoria: prod.categoria,

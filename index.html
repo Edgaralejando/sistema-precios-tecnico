@@ -85,7 +85,6 @@
         .panel-actions {
             display: flex;
             gap: 1rem;
-            flex-wrap: wrap;
         }
 
         .btn-add {
@@ -100,17 +99,6 @@
         }
 
         .btn-add:hover { opacity: 0.9; }
-
-        .btn-bulk {
-            background-color: #8b5cf6;
-            color: white;
-            font-weight: 700;
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .btn-bulk:hover { opacity: 0.9; }
 
         .btn-cancel {
             background-color: #ef4444;
@@ -220,7 +208,6 @@
             <h1>PC MASTER PRECIOS</h1>
         </header>
 
-        <!-- Panel para agregar o modificar ítems -->
         <div class="admin-panel">
             <h3 id="panel-titulo">➕ Agregar Nuevo Ítem a la Nube</h3>
             <input type="hidden" id="edit-id">
@@ -236,7 +223,6 @@
             </div>
             <div class="panel-actions">
                 <button class="btn-add" id="btn-accion" onclick="guardarItemBD()">Guardar en la Base de Datos</button>
-                <button class="btn-bulk" onclick="cargarProductosMasivos()">🚀 Cargar todos los productos masivamente a Firebase</button>
                 <button class="btn-cancel" id="btn-cancelar" onclick="limpiarFormulario()">Cancelar Edición</button>
             </div>
         </div>
@@ -263,7 +249,6 @@
         </div>
     </div>
 
-    <!-- SDK de Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, addDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -281,7 +266,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Almacenamiento local temporal para ubicar datos al editar
         window.datosMemoria = {};
 
         window.cargarDatosBD = async function() {
@@ -350,153 +334,6 @@
             } catch (error) {
                 alert("Error en la base de datos: " + error.message);
                 console.error(error);
-            }
-        };
-
-        // Función para cargar masivamente todos los productos a Firebase
-        window.cargarProductosMasivos = async function() {
-            if (!confirm("¿Estás seguro de cargar todos los productos masivamente a la base de datos?")) return;
-
-            const listaCelulares = [
-                { item: "APPLE", detalle: "IPHONE 6", precio: "$28.000" },
-                { item: "APPLE", detalle: "IPHONE 7", precio: "$29.000" },
-                { item: "APPLE", detalle: "IPHONE 8", precio: "$28.000" },
-                { item: "APPLE", detalle: "IPHONE XR", precio: "$40.000" },
-                { item: "APPLE", detalle: "IPHONE 11", precio: "$40.000" },
-                { item: "APPLE", detalle: "IPHONE 12 INCELL", precio: "$55.000" },
-                { item: "APPLE", detalle: "IPHONE 12 OLED", precio: "$90.000" },
-                { item: "APPLE", detalle: "IPHONE 13 INCELL", precio: "$60.000" },
-                { item: "APPLE", detalle: "IPHONE 13 OLED", precio: "$92.000" },
-                { item: "HUAWEI", detalle: "P20 LITE ORIG SW", precio: "$30.000" },
-                { item: "HUAWEI", detalle: "MATE 20 LITE ORIG SW", precio: "$30.000" },
-                { item: "HUAWEI", detalle: "Y7 2019 ORIG SW", precio: "$30.000" },
-                { item: "HUAWEI", detalle: "Y6 2019 ORIG SW", precio: "$30.000" },
-                { item: "HUAWEI", detalle: "X6S ORIG SW", precio: "$30.000" },
-                { item: "HUAWEI", detalle: "Y7A ORIG SW", precio: "$30.000" },
-                { item: "HONOR", detalle: "90 SMART ORIGINAL", precio: "$30.000" },
-                { item: "HONOR", detalle: "70 LITE ORIG SW", precio: "$30.000" },
-                { item: "HONOR", detalle: "X6A ORIG SW", precio: "$30.000" },
-                { item: "HONOR", detalle: "X6S ORIG SW", precio: "$30.000" },
-                { item: "HONOR", detalle: "X7A ORIG SW", precio: "$30.000" },
-                { item: "XIAOMI", detalle: "REDMI NOTE 10 4G INCELL", precio: "$30.000" },
-                { item: "XIAOMI", detalle: "REDMI NOTE 10 5G ORIG HD+ YZ", precio: "$30.000" },
-                { item: "XIAOMI", detalle: "REDMI 10 4G ORIG SW", precio: "$30.000" },
-                { item: "XIAOMI", detalle: "REDMI 10 ORIG HD+ YZ", precio: "$30.000" },
-                { item: "XIAOMI", detalle: "REDMI 9C ORIG SW", precio: "$30.000" },
-                { item: "XIAOMI", detalle: "REDMI 9 ORIG SW", precio: "$30.000" },
-                { item: "XIAOMI", detalle: "REDMI A3 ORIG SW", precio: "$30.000" },
-                { item: "XIAOMI", detalle: "REDMI A2 ORIG SW", precio: "$30.000" },
-                { item: "XIAOMI", detalle: "REDMI A1 ORIG SW", precio: "$30.000" },
-                { item: "XIAOMI", detalle: "POCO M3 ORIG HD+ YZ", precio: "$30.000" },
-                { item: "XIAOMI", detalle: "POCO M3 ORIG SW", precio: "$30.000" },
-                { item: "XIAOMI", detalle: "POCO C61 ORIG SW", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A70 INCELL C/MARCO", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A51 INCELL C/MARCO", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A32 5G ORIG SW C/MARCO", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A32 INCELL C/MARCO", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A31 INCELL HD 6.4 C/MARCO", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A30 INCELL C/MARCO", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A25 ORIGINAL C/MARCO", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A23 4G ORIG SW S/M", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A22 5G ORIGINAL S/M", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A21S ORIG SW S/M", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A20 ORIG SW C/MARCO", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A16 4G OLED C/MARCO", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A15 ORIGINAL C/MARCO", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A14 5G ORIG HD+ YZ S/M", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A14 4G ORIG S/M", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A13 4G ORIG SW C/MARCO FULL", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A13 4G ORIG SW S/M", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A12 ORIG SW S/M", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A11 ORIG SW S/M", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A03 ORIG SW S/M", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A02 ORIGINAL SW S/M", precio: "$30.000" },
-                { item: "SAMSUNG", detalle: "A01 ORIG SW S/M", precio: "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G55 HP", precio: "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G54 HP", precio: "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G53 HP C/MARCO", precio: "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G52 ORIGINAL", precio: "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G50 5G ORIG SW", precio: "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G35 ORIGINAL YZ", precio: "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G34 HP", precio: "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G31 INCELL", precio: "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G30 HP S/M", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G24 ORIG", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G24 POWER ORIG", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G23 HP", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G22 ORIG HD+ YZ", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G20 HP C/MARCO", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G20 HP S/M", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G15 / G15 POWER ORIGINAL YZ", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G15 HP", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G15 POWER HP", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G14 HP C/MARCO", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G14 HP", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G13 HP", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G10 HP S/M", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G04 / G04 POWER ORIGINAL YZ", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G04S / G05 ORIGINAL YZ", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G04S HP", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G04 ORIG", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G04S ORIG", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G5 POWER HP", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G9 PLUS HP", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G9 PLAY ORIG SW", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G8 PLAY HP", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G8 POWER LITE HP", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G7 PLUS", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G7 PLAY", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G7", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G6", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO G6 PLAY", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO E22 / F22 ORIG HD+ YZ", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO E20", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO E14 HP", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO E13 HP", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO E7 HP", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO E6 PLUS", "precio": "$30.000" },
-                { item: "MOTOROLA", detalle: "MOTO E6", "precio": "$30.000" },
-                { item: "LG", detalle: "K62", "precio": "$30.000" },
-                { item: "LG", detalle: "G52", "precio": "$30.000" },
-                { item: "LG", detalle: "K51S", "precio": "$30.000" },
-                { item: "LG", detalle: "K42", "precio": "$30.000" },
-                { item: "LG", detalle: "K50S", "precio": "$30.000" },
-                { item: "NOKIA", detalle: "NOKIA 6", "precio": "$30.000" },
-                { item: "NOKIA", detalle: "NOKIA 3.1 PLUS", "precio": "$30.000" },
-                { item: "VIVO", detalle: "Y03 ORIG SW", "precio": "$30.000" },
-                { item: "VIVO", detalle: "Y17 ORIG SW", "precio": "$30.000" },
-                { item: "VIVO", detalle: "Y16 ORIG SW", "precio": "$30.000" },
-                { item: "VIVO", detalle: "Y15 ORIG SW", "precio": "$30.000" },
-                { item: "VIVO", detalle: "Y20 ORIG SW", "precio": "$30.000" },
-                { item: "VIVO", detalle: "Y21 ORIG SW", "precio": "$30.000" },
-                { item: "VIVO", detalle: "Y22 / Y22S ORIG SW", "precio": "$30.000" },
-                { item: "VIVO", detalle: "Y27 5G ORIG SW", "precio": "$30.000" },
-                { item: "VIVO", detalle: "Y31 ORIG SW", "precio": "$30.000" },
-                { item: "VIVO", detalle: "Y35 5G ORIG HD+ YZ", "precio": "$30.000" },
-                { item: "VIVO", detalle: "Y36 5G ORIG SW", "precio": "$30.000" },
-                { item: "VIVO", detalle: "Y51 ORIGINAL YZ", "precio": "$30.000" },
-                { item: "VIVO", detalle: "Y55 5G HP", "precio": "$30.000" },
-                { item: "OPPO", detalle: "OPPO A18 ORIG SW", "precio": "$30.000" },
-                { item: "OPPO", detalle: "OPPO A38 ORIG SW", "precio": "$30.000" },
-                { item: "OPPO", detalle: "OPPO A40 4G ORIG SW", "precio": "$30.000" },
-                { item: "OPPO", detalle: "OPPO A58 4G ORIG SW", "precio": "$30.000" }
-            ];
-
-            try {
-                for (let prod of listaCelulares) {
-                    await addDoc(collection(db, "precios"), {
-                        categoria: "celulares",
-                        item: prod.item,
-                        detalle: prod.detalle,
-                        precio: prod.precio,
-                        fecha: new Date()
-                    });
-                }
-                alert("¡Todos los productos fueron cargados exitosamente a Firebase!");
-                window.cargarDatosBD();
-            } catch (err) {
-                alert("Error al cargar masivamente: " + err.message);
-                console.error(err);
             }
         };
 

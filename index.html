@@ -112,8 +112,19 @@
         }
         .btn-bulk:hover { opacity: 0.9; }
 
-        .btn-cancel {
+        .btn-clear {
             background-color: #ef4444;
+            color: white;
+            font-weight: 700;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .btn-clear:hover { opacity: 0.9; }
+
+        .btn-cancel {
+            background-color: #6b7280;
             color: white;
             font-weight: 700;
             padding: 0.8rem 1.5rem;
@@ -236,7 +247,8 @@
             </div>
             <div class="panel-actions">
                 <button class="btn-add" id="btn-accion" onclick="guardarItemBD()">Guardar en la Base de Datos</button>
-                <button class="btn-bulk" onclick="cargarProductosMasivos()">🚀 Cargar todos los productos masivamente a Firebase</button>
+                <button class="btn-bulk" onclick="cargarProductosMasivos()">🚀 Cargar todos los productos masivamente</button>
+                <button class="btn-clear" onclick="limpiarBaseDatosCompleta()">🧹 Limpiar toda la Base de Datos</button>
                 <button class="btn-cancel" id="btn-cancelar" onclick="limpiarFormulario()">Cancelar Edición</button>
             </div>
         </div>
@@ -266,7 +278,7 @@
     <!-- SDK de Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCabrm6iqHIgjNb-UUb8xxJm9-Hri-q0Gk",
@@ -314,6 +326,27 @@
                 });
             } catch (error) {
                 console.error("Error al cargar la base de datos:", error);
+            }
+        };
+
+        // Función para limpiar/borrar TODOS los documentos de Firebase de golpe
+        window.limpiarBaseDatosCompleta = async function() {
+            if (!confirm("⚠️ ¡ADVERTENCIA! ¿Estás seguro de borrar TODOS los productos de la base de datos? Esta acción no se puede deshacer.")) return;
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "precios"));
+                let promesasBorrado = [];
+
+                querySnapshot.forEach((documento) => {
+                    promesasBorrado.push(deleteDoc(doc(db, "precios", documento.id)));
+                });
+
+                await Promise.all(promesasBorrado);
+                alert("¡Base de datos limpiada con éxito! Ahora puedes cargar los productos limpios.");
+                window.cargarDatosBD();
+            } catch (error) {
+                alert("Error al limpiar la base de datos: " + error.message);
+                console.error(error);
             }
         };
 
@@ -536,7 +569,6 @@
             event.currentTarget.classList.add('active');
         }
 
-        // Búsqueda optimizada para que no se congele el navegador
         function filterTable(category) {
             const filter = document.getElementById(`search-${category}`).value.toLowerCase();
             const tr = document.querySelectorAll(`#table-${category} tbody tr`);

@@ -13,7 +13,6 @@
             --primary-glow: rgba(56, 189, 248, 0.15);
             --accent: #10b981;
             --warning: #f59e0b;
-            --danger: #ef4444;
             --text-main: #f3f4f6;
             --text-muted: #9ca3af;
         }
@@ -86,7 +85,6 @@
         .panel-actions {
             display: flex;
             gap: 1rem;
-            flex-wrap: wrap;
         }
 
         .btn-add {
@@ -102,19 +100,8 @@
 
         .btn-add:hover { opacity: 0.9; }
 
-        .btn-clean {
-            background-color: #d97706;
-            color: white;
-            font-weight: 700;
-            padding: 0.8rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .btn-clean:hover { opacity: 0.9; }
-
         .btn-cancel {
-            background-color: var(--danger);
+            background-color: #ef4444;
             color: white;
             font-weight: 700;
             padding: 0.8rem 1.5rem;
@@ -148,31 +135,6 @@
             border-color: var(--primary);
             color: var(--primary);
             background-color: var(--primary-glow);
-        }
-
-        .sub-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .sub-tab-btn {
-            background-color: #0d1322;
-            border: 1px solid var(--border-tech);
-            padding: 0.5rem 1rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            border-radius: 6px;
-            cursor: pointer;
-            color: var(--text-muted);
-            transition: all 0.3s ease;
-        }
-
-        .sub-tab-btn:hover, .sub-tab-btn.active {
-            border-color: var(--accent);
-            color: var(--accent);
-            background-color: rgba(16, 185, 129, 0.1);
         }
 
         .catalog-section {
@@ -227,11 +189,6 @@
             color: var(--accent);
         }
 
-        .actions-group {
-            display: flex;
-            gap: 0.5rem;
-        }
-
         .btn-edit {
             background-color: var(--warning);
             color: #090d16;
@@ -243,18 +200,6 @@
             font-size: 0.85rem;
         }
         .btn-edit:hover { opacity: 0.9; }
-
-        .btn-delete-row {
-            background-color: var(--danger);
-            color: white;
-            border: none;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.85rem;
-        }
-        .btn-delete-row:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
@@ -267,26 +212,17 @@
             <h3 id="panel-titulo">➕ Agregar Nuevo Ítem a la Nube</h3>
             <input type="hidden" id="edit-id">
             <div class="form-grid">
-                <select id="nuevo-categoria" onchange="toggleSubcategoria()">
+                <select id="nuevo-categoria">
                     <option value="celulares">Celulares</option>
                     <option value="consolas">Consolas</option>
                     <option value="computadoras">Computadoras</option>
                 </select>
-                <select id="nuevo-subcategoria">
-                    <option value="Pantallas">Pantallas</option>
-                    <option value="Baterias">Baterías</option>
-                    <option value="Puertos de carga">Puertos de carga</option>
-                    <option value="Parlantes">Parlantes</option>
-                    <option value="Camaras">Cámaras</option>
-                    <option value="Tapas traseras">Tapas traseras</option>
-                </select>
                 <input type="text" id="nuevo-item" placeholder="Marca (Ej: HUAWEI, XIAOMI)">
-                <input type="text" id="nuevo-detalle" placeholder="Detalle (Ej: IPHONE 6 S/M)">
+                <input type="text" id="nuevo-detalle" placeholder="Detalle (Ej: Pantalla OLED S/M)">
                 <input type="text" id="nuevo-precio" placeholder="Precio (Ej: $25.000 o Consultar)">
             </div>
             <div class="panel-actions">
                 <button class="btn-add" id="btn-accion" onclick="guardarItemBD()">Guardar en la Base de Datos</button>
-                <button class="btn-clean" onclick="limpiarDuplicadosExactosBD()">🧹 Borrar Copias Duplicadas</button>
                 <button class="btn-cancel" id="btn-cancelar" onclick="limpiarFormulario()">Cancelar Edición</button>
             </div>
         </div>
@@ -298,33 +234,24 @@
         </div>
 
         <div id="celulares" class="catalog-section active">
-            <div class="sub-tabs">
-                <button class="sub-tab-btn active" onclick="filterSubcat('todos', this)">Todos</button>
-                <button class="sub-tab-btn" onclick="filterSubcat('Pantallas', this)">Pantallas</button>
-                <button class="sub-tab-btn" onclick="filterSubcat('Baterias', this)">Baterías</button>
-                <button class="sub-tab-btn" onclick="filterSubcat('Puertos de carga', this)">Puertos de carga</button>
-                <button class="sub-tab-btn" onclick="filterSubcat('Parlantes', this)">Parlantes</button>
-                <button class="sub-tab-btn" onclick="filterSubcat('Camaras', this)">Cámaras</button>
-                <button class="sub-tab-btn" onclick="filterSubcat('Tapas traseras', this)">Tapas traseras</button>
-            </div>
-            <div class="search-box"><input type="text" id="search-celulares" placeholder="Buscar componente o modelo en celulares..." oninput="debounceFilter('celulares')"></div>
+            <div class="search-box"><input type="text" id="search-celulares" placeholder="Buscar componente o modelo en celulares..." onkeyup="filterTable('celulares')"></div>
             <div class="table-container"><table id="table-celulares"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
         </div>
 
         <div id="consolas" class="catalog-section">
-            <div class="search-box"><input type="text" id="search-consolas" placeholder="Buscar componente o modelo en consolas..." oninput="debounceFilter('consolas')"></div>
+            <div class="search-box"><input type="text" id="search-consolas" placeholder="Buscar componente o modelo en consolas..." onkeyup="filterTable('consolas')"></div>
             <div class="table-container"><table id="table-consolas"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
         </div>
 
         <div id="computadoras" class="catalog-section">
-            <div class="search-box"><input type="text" id="search-computadoras" placeholder="Buscar componente o modelo en computadoras..." oninput="debounceFilter('computadoras')"></div>
+            <div class="search-box"><input type="text" id="search-computadoras" placeholder="Buscar componente o modelo en computadoras..." onkeyup="filterTable('computadoras')"></div>
             <div class="table-container"><table id="table-computadoras"><thead><tr><th>Marca / Ítem</th><th>Descripción Detallada</th><th>Precio</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCabrm6iqHIgjNb-UUb8xxJm9-Hri-q0Gk",
@@ -340,13 +267,6 @@
         const db = getFirestore(app);
 
         window.datosMemoria = {};
-        window.subcatActual = 'todos';
-
-        window.toggleSubcategoria = function() {
-            const cat = document.getElementById('nuevo-categoria').value;
-            const subcatSelect = document.getElementById('nuevo-subcategoria');
-            subcatSelect.style.display = (cat === 'celulares') ? 'inline-block' : 'none';
-        };
 
         window.cargarDatosBD = async function() {
             try {
@@ -367,69 +287,23 @@
                     const tbody = document.querySelector(`#table-${cat} tbody`);
                     tbody.innerHTML = "";
                     datosGlobales[cat].forEach(row => {
-                        const subcatAttr = row.subcategoria ? row.subcategoria : 'Pantallas';
                         tbody.innerHTML += `
-                            <tr data-subcat="${subcatAttr}">
+                            <tr>
                                 <td>${row.item}</td>
                                 <td>${row.detalle}</td>
                                 <td class="price-tag">${row.precio}</td>
-                                <td>
-                                    <div class="actions-group">
-                                        <button class="btn-edit" onclick="prepararEdicion('${row.id}')">✏️ Editar</button>
-                                        <button class="btn-delete-row" onclick="eliminarFilaIndividual('${row.id}')">🗑️ Borrar</button>
-                                    </div>
-                                </td>
+                                <td><button class="btn-edit" onclick="prepararEdicion('${row.id}')">✏️ Editar</button></td>
                             </tr>`;
                     });
                 });
-                filterSubcat(window.subcatActual);
             } catch (error) {
                 console.error("Error al cargar la base de datos:", error);
-            }
-        };
-
-        window.eliminarFilaIndividual = async function(id) {
-            if (!confirm("🗑️ ¿Estás seguro de eliminar este ítem específico?")) return;
-            try {
-                await deleteDoc(doc(db, "precios", id));
-                window.cargarDatosBD();
-            } catch (error) {
-                alert("Error al eliminar: " + error.message);
-            }
-        };
-
-        window.limpiarDuplicadosExactosBD = async function() {
-            if (!confirm("🧹 ¿Deseas limpiar y eliminar las copias exactas repetidas en Firebase?")) return;
-
-            try {
-                const querySnapshot = await getDocs(collection(db, "precios"));
-                const vistos = new Set();
-                let eliminados = 0;
-
-                for (const documento of querySnapshot.docs) {
-                    const d = documento.data();
-                    const claveExacta = `${d.categoria || ''}_${d.subcategoria || ''}_${d.item || ''}_${d.detalle || ''}_${d.precio || ''}`.toLowerCase().trim();
-
-                    if (vistos.has(claveExacta)) {
-                        await deleteDoc(doc(db, "precios", documento.id));
-                        eliminados++;
-                    } else {
-                        vistos.add(claveExacta);
-                    }
-                }
-
-                alert(`¡Limpieza completada! Se eliminaron ${eliminados} copias idénticas repetidas.`);
-                window.cargarDatosBD();
-            } catch (error) {
-                alert("Error al limpiar duplicados: " + error.message);
-                console.error(error);
             }
         };
 
         window.guardarItemBD = async function() {
             const editId = document.getElementById('edit-id').value;
             const categoria = document.getElementById('nuevo-categoria').value;
-            const subcategoria = (categoria === 'celulares') ? document.getElementById('nuevo-subcategoria').value : '';
             const item = document.getElementById('nuevo-item').value.trim();
             const detalle = document.getElementById('nuevo-detalle').value.trim();
             const precio = document.getElementById('nuevo-precio').value.trim();
@@ -442,12 +316,11 @@
             try {
                 if (editId) {
                     const docRef = doc(db, "precios", editId);
-                    await updateDoc(docRef, { categoria, subcategoria, item, detalle, precio });
+                    await updateDoc(docRef, { categoria, item, detalle, precio });
                     alert("¡Ítem actualizado correctamente en la nube!");
                 } else {
                     await addDoc(collection(db, "precios"), {
                         categoria,
-                        subcategoria,
                         item,
                         detalle,
                         precio,
@@ -470,10 +343,6 @@
 
             document.getElementById('edit-id').value = id;
             document.getElementById('nuevo-categoria').value = data.categoria;
-            window.toggleSubcategoria();
-            if (data.categoria === 'celulares') {
-                document.getElementById('nuevo-subcategoria').value = data.subcategoria || 'Pantallas';
-            }
             document.getElementById('nuevo-item').value = data.item;
             document.getElementById('nuevo-detalle').value = data.detalle;
             document.getElementById('nuevo-precio').value = data.precio;
@@ -505,42 +374,12 @@
             event.currentTarget.classList.add('active');
         }
 
-        function filterSubcat(subcat, btnElement) {
-            window.subcatActual = subcat;
-            if (btnElement) {
-                document.querySelectorAll('#celulares .sub-tab-btn').forEach(b => b.classList.remove('active'));
-                btnElement.classList.add('active');
-            }
-            const rows = document.querySelectorAll('#table-celulares tbody tr');
-            rows.forEach(row => {
-                const rowSubcat = row.getAttribute('data-subcat');
-                if (subcat === 'todos' || rowSubcat === subcat) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-
-        let searchTimeout;
-        function debounceFilter(category) {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                filterTable(category);
-            }, 150);
-        }
-
         function filterTable(category) {
             const filter = document.getElementById(`search-${category}`).value.toLowerCase();
             const tr = document.querySelectorAll(`#table-${category} tbody tr`);
-            
-            requestAnimationFrame(() => {
-                tr.forEach(row => {
-                    const text = row.innerText.toLowerCase();
-                    const matchesSearch = text.includes(filter);
-                    const matchesSubcat = (category !== 'celulares' || window.subcatActual === 'todos' || row.getAttribute('data-subcat') === window.subcatActual);
-                    row.style.display = (matchesSearch && matchesSubcat) ? "" : "none";
-                });
+            tr.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(filter) ? "" : "none";
             });
         }
     </script>
